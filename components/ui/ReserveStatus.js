@@ -12,7 +12,7 @@ export default function ReserveStatus({ token }) {
         <div className="flex flex-wrap">
           <div className="relative w-full  max-w-full">
             <p className="font-bold text-lg">
-              Reserve status and Configuration
+              Your Supples and Borrows
             </p>
           </div>
           <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right"></div>
@@ -31,7 +31,7 @@ export default function ReserveStatus({ token }) {
                 <p className="font-medium text-lg">${todp(token.totalSuppliedInContract.inDollars, 3)}</p>
               </div>
             </div>
-            <div className="bg-gray-200 my-3 px-2 rounded-md">
+            <div className="bg-blue-100 my-3 px-2 rounded-md">
               <div className="text-green-700 font-bold">
                ✔️ Can be collateral
                </div>

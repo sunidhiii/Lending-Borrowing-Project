@@ -58,7 +58,7 @@ export default function Details({ token }) {
       <div className="relative bg-gray-100 ">
         {/* <Navbar /> */}
         {/* Header */}
-        <div className="relative bg-gray-700 md:pt-32 pb-32 pt-12">
+        <div className="relative bg-blue-100 md:pt-32 pb-32 pt-12">
           <div className="md:px-10 mx-auto w-full">
             <div>
               {/* Card stats */}
@@ -77,7 +77,7 @@ export default function Details({ token }) {
                         />
                       )}
 
-                      <div className="text-2xl sm:text-4xl text- ml-2 text-white font-bold">
+                      <div className="text-2xl sm:text-4xl text- ml-2 text-black font-bold">
                         {token.name}
                       </div>
                     </div>
@@ -100,7 +100,7 @@ export default function Details({ token }) {
                           </svg>
                         </div>
                         <div className=" ml-2">
-                          <div className="text-sm text-white">
+                          <div className="text-sm text-black">
                             Reserve Size:{" "}
                             <div className="font-bold text-xl">
                               ${todp(token.totalSuppliedInContract.inDollars, 2)}
@@ -132,7 +132,7 @@ export default function Details({ token }) {
                           </svg>
                         </div>
                         <div className=" ml-2">
-                          <div className="text-sm text-white">
+                          <div className="text-sm text-black">
                             Available Liquidity:{" "}
                             <div className="font-bold text-xl">
                               $

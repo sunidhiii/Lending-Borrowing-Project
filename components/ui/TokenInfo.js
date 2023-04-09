@@ -207,10 +207,10 @@ export default function TokenInfo({
               </p>
               <div className="flex flex-col">
                 <p className="font-medium text-sm sm:text-base">
-                  {todp(token.walletBalance.amount, 2)} {token.name}
+                  {todp(token.walletBalance.amount, 4)} {token.name}
                 </p>
                 <p className="font-medium text-gray-500 text-sm">
-                  ${todp(token.walletBalance.inDollars, 2)}{" "}
+                  ${todp(token.walletBalance.inDollars, 4)}{" "}
                 </p>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function TokenInfo({
                 Available to Supply
               </p>
               <p className="font-medium text-sm sm:text-base">
-                {todp(token.walletBalance.amount, 2)} {token.name}
+                {todp(token.walletBalance.amount, 4)} {token.name}
               </p>
             </div>
             <div className="flex w-full py-2 justify-between">
@@ -228,19 +228,19 @@ export default function TokenInfo({
               </p>
               <p className="font-medium text-sm sm:text-base">
                 {" "}
-                {todp(actualAvailable, 2)} {token.name}
+                {todp(actualAvailable, 4)} {token.name}
               </p>
             </div>
             <div className="flex w-full pt-8">
               <button
                 onClick={() => setSelectedTokenToSupply(token)}
-                className="bg-gray-800 text-white p-2 rounded-md text-base"
+                className="bg-blue-400 text-white p-2 rounded-md text-base"
               >
                 Supply
               </button>
               <button
                 onClick={() => setSelectedTokenToBorrow(token)}
-                className="bg-gray-800 text-white ml-2 p-2 rounded-md text-base"
+                className="bg-blue-400 text-white ml-2 p-2 rounded-md text-base"
               >
                 Borrow
               </button>
