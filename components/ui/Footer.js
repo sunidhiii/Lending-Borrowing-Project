@@ -20,6 +20,13 @@ export default function Footer() {
           </div>
         </div>
       </footer>
+      <div className="flex justify-center text-center sm:block sm:p-0 mt-2">
+        {contactDeveloper && (
+          <ModalContact
+            closeModal={handleCloseModal}
+          />
+        )}
+      </div>
     </>
   );
 }

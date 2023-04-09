@@ -30,10 +30,6 @@ export default function ReserveStatus({ token }) {
                 </p>
                 <p className="font-medium text-lg">${todp(token.totalSuppliedInContract.inDollars, 3)}</p>
               </div>
-              <div className="ml-4">
-                <p className="font-medium text-gray-500 text-sm">APY </p>
-                <p className="font-medium sm:text-lg">N/A</p>
-              </div>
             </div>
             <div className="bg-gray-200 my-3 px-2 rounded-md">
               <div className="text-green-700 font-bold">
@@ -41,7 +37,7 @@ export default function ReserveStatus({ token }) {
                </div>
               <div className="mt-2">
                 <span className="text-large">MAX LTV: </span>
-                <span className="font-medium">{todp((token.LTV * 100), 2)}%</span>
+                <span className="font-medium">{todp((token.LTV), 2)}%</span>
               </div>
             </div>
           </div>
@@ -59,9 +55,9 @@ export default function ReserveStatus({ token }) {
               </div>
               <div className="ml-4">
                 <p className="font-medium text-gray-500 text-sm">
-                  APY Stable{" "}
+                  Interest Stable{" "}
                 </p>
-                <p className="font-medium sm:text-lg">{todp(token.borrowAPYRate * 100, 2) }%</p>
+                <p className="font-medium sm:text-lg">{todp(token.borrowAPYRate, 2) }%</p>
               </div>
             </div>
           </div>

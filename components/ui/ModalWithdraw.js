@@ -114,13 +114,13 @@ export default function ModalWithdraw({
             <p>
               You&apos;ve withdrawn {value} {token?.name}
             </p>
-            <button
+            {/* <button
               onClick={() => addTokenToMetamask(token)}
               className="p-1 border my-3 border-gray-800 text-sm font-medium rounded-md"
             >
               {" "}
               + Add {token?.name} to the Wallet
-            </button>
+            </button> */}
 
             <button
               onClick={() => {
@@ -129,9 +129,9 @@ export default function ModalWithdraw({
                   "_blank"
                 );
               }}
-              className="text-sm self-end pr-3 mt-3 text-gray-500 "
+              className="text-sm justify-center pr-3 mt-3 text-blue-500 "
             >
-              Review tx details
+              view tx details on etherscan
             </button>
 
             <div className="flex w-full items-center p-6 space-x-2 rounded-b border-gray-200 dark:border-gray-600">

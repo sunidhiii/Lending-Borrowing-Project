@@ -45,7 +45,7 @@ export const handler = (web3, contract) => () => {
               yourSupplies.push(normalized);
               tokenAddressTracker.push(currentTokenAddress);
             }
-            console.log("Suplies",yourSupplies);
+            // console.log("Suplies",yourSupplies);
           }
         }
 

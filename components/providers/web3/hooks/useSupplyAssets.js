@@ -23,14 +23,20 @@ export const handler = (web3, contract) => () => {
       const supplyAssets = []
 
       const tokens = await contract.methods.getAllSupportedTokens().call()
+      console.log("currentToken", tokens);
 
       for (let i = 0; i < tokens.length; i++){
         const currentToken = tokens[i]
         const currentTokenObj = await contract.methods.supportedTokens(currentToken).call();
 
+      console.log("currentTokenObj", currentTokenObj);
+
+
+
         const newToken = await normalizeToken(web3, contract, currentTokenObj)
 
         supplyAssets.push(newToken)
+
 
       }
 

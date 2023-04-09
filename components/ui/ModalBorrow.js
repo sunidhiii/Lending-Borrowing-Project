@@ -45,6 +45,8 @@ export default function ModalBorrow({
     actualAvailableInDollars = tokenAvailableInContractInDollars;
   }
 
+
+
   const [value, setValue] = useState("");
   const [valueInDollars, setValueInDollars] = useState("0");
 
@@ -107,13 +109,13 @@ export default function ModalBorrow({
           <p>
             You borrowed {value} {token?.name}
           </p>
-          <button
+          {/* <button
             onClick={() => addBorrowedToken(token)}
             className="p-1 border my-3 border-gray-800 text-sm font-medium rounded-md"
           >
             {" "}
             + Add {token?.name} to the Wallet
-          </button>
+          </button> */}
 
           <button
             onClick={() => {
@@ -122,9 +124,9 @@ export default function ModalBorrow({
                 "_blank"
               );
             }}
-            className="text-sm self-end pr-3 mt-3 text-gray-500 "
+            className="text-sm justify-center pr-3 mt-3 text-blue-500 "
           >
-            Review tx details
+            view tx details on etherscan
           </button>
 
           <div className="flex w-full items-center p-6 space-x-2 rounded-b border-gray-200 dark:border-gray-600">
@@ -218,11 +220,11 @@ export default function ModalBorrow({
           </div>
           <div className="p-6 pt-1 ">
             <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              Borrow APY Rate
+              Borrow Interest Rate
             </p>
             <div className="flex flex-col w-4/12 items-center bg-gray-100 border rounded-md p-1 border-gray-300">
               <p className="text-black self-start text-sm sm:text-base">
-                Stable: {Number(token?.borrowAPYRate * 100).toFixed(2)}%
+                Stable: {Number(token?.borrowAPYRate).toFixed(2)}%
               </p>
             </div>
             {borrowingError && (

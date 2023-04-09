@@ -3,7 +3,7 @@ import { useState } from "react";
 import ModalBorrow from "./ModalBorrow";
 import ModalSupply from "./ModalSupply";
 import ERC20 from "../../abis/ADE.json";
-import ATKToken from "../../abis/ATKToken.json";
+import LARToken from "../../abis/LARToken.json";
 import { trackPromise } from "react-promise-tracker";
 
 export default function TokenInfo({
@@ -16,14 +16,9 @@ export default function TokenInfo({
   yourBorrows,
 }) {
   const IMAGES = {
-    DAI:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSllrF9PNBf88kIx9USP5g73XDYjkMyRBaDig&usqp=CAU",
-    WETH: "https://staging.aave.com/icons/tokens/weth.svg",
-    LINK: "https://staging.aave.com/icons/tokens/link.svg",
-    FAU:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5qUPi3Ar2dQZ2m9K5opr_h9QaQz4_G5HVYA&usqp=CAU",
-    ATK:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqZs8PLHRLaGd4QfIvOYmCg30svx5dHp0y6A&usqp=CAU",
+    USDT: "https://staging.aave.com/icons/tokens/usdt.svg",
+    ETH: "https://staging.aave.com/icons/tokens/eth.svg",
+    LAR: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqZs8PLHRLaGd4QfIvOYmCg30svx5dHp0y6A&usqp=CAU",
   };
 
   const [selectedTokenToSupply, setSelectedTokenToSupply] = useState(null);
@@ -46,38 +41,61 @@ export default function TokenInfo({
 
   const supplyToken = async (token, value) => {
     let NETWORK_ID = await web3.eth.net.getId();
-    const tokenInst = new web3.eth.Contract(ERC20.abi, token.tokenAddress);
-    const aToken = new web3.eth.Contract(
-      ERC20.abi,
-      ATKToken.networks[NETWORK_ID].address
-    );
 
-    try {
-      await trackPromise(
-        tokenInst.methods
-          .approve(contract.options.address, web3.utils.toWei(value.toString()))
-          .send({ from: account.data })
-      );
+    if (token.tokenAddress == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+      try {
+        const supplyResult = await trackPromise(
+          contract.methods
+            .lend(token.tokenAddress, 0)
+            .send({
+              from: account.data,
+              value: web3.utils.toWei(value.toString()),
+            })
+        );
 
-      const supplyResult = await trackPromise(
-        contract.methods
-          .lend(tokenInst.options.address, web3.utils.toWei(value.toString()))
-          .send({ from: account.data })
-      );
+        setSupplyResult(supplyResult);
+      } catch (err) {
+        setSupplyError(err);
+      }
+    } else {
+      const tokenInst = new web3.eth.Contract(ERC20.abi, token.tokenAddress);
+      // const larToken = new web3.eth.Contract(
+      //   ERC20.abi,
+      //   LARToken.networks[NETWORK_ID].address
+      // );
 
-      const aTokenBalance = await aToken.methods
-        .balanceOf(account.data)
-        .call();
+      const amount = value.toString() * 10 ** token.decimals;
 
-      await trackPromise(
-        aToken.methods
-          .approve(contract.options.address, web3.utils.toWei(aTokenBalance.toString()))
-          .send({ from: account.data })
-      );
+      try {
+        await trackPromise(
+          tokenInst.methods
+            .approve(
+              contract.options.address,
+              amount
+            )
+            .send({ from: account.data })
+        );
 
-      setSupplyResult(supplyResult);
-    } catch (err) {
-      setSupplyError(err);
+        const supplyResult = await trackPromise(
+          contract.methods
+            .lend(tokenInst.options.address, amount)
+            .send({ from: account.data })
+        );
+
+        // const larTokenBalance = await larToken.methods
+        //   .balanceOf(account.data)
+        //   .call();
+
+        // await trackPromise(
+        //   larToken.methods
+        //     .approve(contract.options.address, toWei(larTokenBalance))
+        //     .send({ from: account.data })
+        // );
+
+        setSupplyResult(supplyResult);
+      } catch (err) {
+        setSupplyError(err);
+      }
     }
   };
 
@@ -85,10 +103,14 @@ export default function TokenInfo({
     setBorrowingError(null);
     setBorrowingResult(null);
 
+    value = parseFloat(value).toFixed(12);
+    
+    const amount = value.toString() * 10 ** token.decimals;
+
     try {
       const borrowingResult = await trackPromise(
         contract.methods
-          .borrow(web3.utils.toWei(value.toString()), token.tokenAddress)
+          .borrow(token.tokenAddress, amount)
           .send({ from: account.data })
       );
       setBorrowingResult(borrowingResult);
@@ -119,7 +141,7 @@ export default function TokenInfo({
       });
 
       if (wasAdded) {
-      // Added
+        // Added
       } else {
         // Not Added
       }
@@ -130,15 +152,15 @@ export default function TokenInfo({
 
   const addATK = async (token) => {
     let NETWORK_ID = await web3.eth.net.getId();
-    const aToken = new web3.eth.Contract(
+    const larToken = new web3.eth.Contract(
       ERC20.abi,
-      ATKToken.networks[NETWORK_ID].address
+      LARToken.networks[NETWORK_ID].address
     );
 
-    const tokenAddress = aToken.options.address;
-    const tokenSymbol = "ATK";
+    const tokenAddress = larToken.options.address;
+    const tokenSymbol = "LAR";
     const tokenDecimals = 18;
-    const tokenImage = IMAGES["ATK"];
+    const tokenImage = IMAGES["LAR"];
 
     try {
       // wasAdded is a boolean. Like any RPC method, an error may be thrown.
@@ -156,9 +178,9 @@ export default function TokenInfo({
       });
 
       if (wasAdded) {
-       // Added
+        // Added
       } else {
-       // Not Added
+        // Not Added
       }
     } catch (error) {
       console.log(error);

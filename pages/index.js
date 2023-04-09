@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Head from 'next/head'
-import Image from 'next/image'
+import Head from "next/head";
+import Image from "next/image";
 import {
   useAccount,
   useBorrowAssets,
@@ -12,21 +12,23 @@ import {
 import { useWeb3 } from "../components/providers/web3";
 import { useEffect, useState } from "react";
 import eth from "../assets/eth.png";
-import ERC20 from "../abis/USDT.json";
-import ATKToken from "../abis/ATKToken.json";
+import ERC20 from "../abis/ADE.json";
+import LARToken from "../abis/LARToken.json";
 import { trackPromise } from "react-promise-tracker";
 import { todp } from "../utils/todp";
 import Navbar from "../components/ui/Navbar";
 import YourSupply from "../components/ui/YourSupplies";
 import YourBorrows from "../components/ui/YourBorrows";
-import SupplyAsset from "../components/ui/SupplyAssets";
+import SupplyAssets from "../components/ui/SupplyAssets";
+import SupportedAssets from "../components/ui/SupportedAssets";
 import BorrowAssets from "../components/ui/BorrowAssets";
 import Footer from "../components/ui/Footer";
 import ModalSupply from "../components/ui/ModalSupply";
 import ModalWithdraw from "../components/ui/ModalWithdraw";
 import ModalRepay from "../components/ui/ModalRepay";
 import ModalBorrow from "../components/ui/ModalBorrow";
-import RowSupplyAsset from "../components/ui/RowSupplyAsset";
+// import RowSupplyAsset from "../components/ui/RowSupplyAsset";
+import RowSupportedAsset from "../components/ui/RowSupportedAsset";
 import RowBorrowAsset from "../components/ui/RowBorrowAsset";
 import SupplyRow from "../components/ui/SupplyRow";
 import BorrowRow from "../components/ui/BorrowRow";
@@ -41,11 +43,9 @@ export default function Home() {
   const { yourBorrows } = useYourBorrows();
 
   const IMAGES = {
-    USDT:
-      "https://staging.aave.com/icons/tokens/usdt.svg",
+    USDT: "https://staging.aave.com/icons/tokens/usdt.svg",
     ETH: "https://staging.aave.com/icons/tokens/eth.svg",
-    ATK:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqZs8PLHRLaGd4QfIvOYmCg30svx5dHp0y6A&usqp=CAU",
+    LAR: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqZs8PLHRLaGd4QfIvOYmCg30svx5dHp0y6A&usqp=CAU",
   };
 
   const [selectedTokenToSupply, setSelectedTokenToSupply] = useState(null);
@@ -68,8 +68,9 @@ export default function Home() {
   const [repayError, setRepayError] = useState(null);
   const [repayResult, setRepayResult] = useState(null);
 
-  const toWei = (value) => {
-    return web3.utils.toWei(value.toString());
+  const toWei = (value, decimals) => {
+    // return web3.utils.toWei(value.toString());
+    return value.toString() * 10 ** decimals;
   };
 
   const handleCloseModal = () => {
@@ -88,41 +89,56 @@ export default function Home() {
     setTransactionHash(null);
   };
 
-
   const supplyToken = async (token, value) => {
     let NETWORK_ID = await web3.eth.net.getId();
-    const tokenInst = new web3.eth.Contract(ERC20.abi, token.tokenAddress);
-    const aToken = new web3.eth.Contract(
-      ERC20.abi,
-      ATKToken.networks[NETWORK_ID].address
-    );
 
-    try {
-      await trackPromise(
-        tokenInst.methods
-          .approve(contract.options.address, toWei(value))
-          .send({ from: account.data })
-      );
+    if (token.tokenAddress == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+      try {
+        const supplyResult = await trackPromise(
+          contract.methods
+            .lend(token.tokenAddress, 0)
+            .send({ from: account.data, value: toWei(value, token.decimals) })
+        );
 
-      const supplyResult = await trackPromise(
-        contract.methods
-          .lend(tokenInst.options.address, toWei(value))
-          .send({ from: account.data })
-      );
+        setSupplyResult(supplyResult);
+      } catch (err) {
+        setSupplyError(err);
+      }
+    } else {
+      const tokenInst = new web3.eth.Contract(ERC20.abi, token.tokenAddress);
+      // const larToken = new web3.eth.Contract(
+      //   ERC20.abi,
+      //   LARToken.networks[NETWORK_ID].address
+      // );
 
-      const aTokenBalance = await aToken.methods
-        .balanceOf(account.data)
-        .call();
 
-      await trackPromise(
-        aToken.methods
-          .approve(contract.options.address, toWei(aTokenBalance))
-          .send({ from: account.data })
-      );
+      try {
+        await trackPromise(
+          tokenInst.methods
+            .approve(contract.options.address, toWei(value, token.decimals))
+            .send({ from: account.data })
+        );
 
-      setSupplyResult(supplyResult);
-    } catch (err) {
-      setSupplyError(err);
+        const supplyResult = await trackPromise(
+          contract.methods
+            .lend(tokenInst.options.address, toWei(value, token.decimals))
+            .send({ from: account.data })
+        );
+
+        // const larTokenBalance = await larToken.methods
+        //   .balanceOf(account.data)
+        //   .call();
+
+        // await trackPromise(
+        //   larToken.methods
+        //     .approve(contract.options.address, toWei(larTokenBalance))
+        //     .send({ from: account.data })
+        // );
+
+        setSupplyResult(supplyResult);
+      } catch (err) {
+        setSupplyError(err);
+      }
     }
   };
 
@@ -130,10 +146,12 @@ export default function Home() {
     setBorrowingError(null);
     setBorrowingResult(null);
 
+    value = parseFloat(value).toFixed(12)
+
     try {
       const borrowingResult = await trackPromise(
         contract.methods
-          .borrow(toWei(value), token.tokenAddress)
+          .borrow(token.tokenAddress, toWei(value, token.decimals))
           .send({ from: account.data })
       );
       setBorrowingResult(borrowingResult);
@@ -146,11 +164,34 @@ export default function Home() {
     setWithdrawError(null);
     setWithdrawResult(null);
 
+    let NETWORK_ID = await web3.eth.net.getId();
+
+    console.log("Token", token);
+
 
     try {
+      const larToken = new web3.eth.Contract(
+        ERC20.abi,
+        LARToken.networks[NETWORK_ID].address
+      );
+
+      console.log("token.decimals", toWei(value, token.decimals));
+
+      const larTokenBalance = await larToken.methods
+        .balanceOf(account.data)
+        .call();
+
+        console.log("larTokenBalance",larTokenBalance);
+
+      await trackPromise(
+        larToken.methods
+          .approve(contract.options.address, larTokenBalance)
+          .send({ from: account.data })
+      );
+
       const withdrawResult = await trackPromise(
         contract.methods
-          .withdraw(token.tokenAddress, toWei(value))
+          .withdraw(token.tokenAddress, toWei(value, token.decimals))
           .send({ from: account.data })
       );
       setWithdrawResult(withdrawResult);
@@ -163,30 +204,47 @@ export default function Home() {
     setRepayError(null);
     setRepayResult(null);
 
-    const tokenToRepay = new web3.eth.Contract(ERC20.abi, token.tokenAddress);
-    const interest = Number(token.borrowAPYRate) * Number(toWei(value));
-    const amountToPayBack = (Number(toWei(value)) + interest).toString();
+    const tokenBought = await contract.methods.tokensBorrowedAmount(token.tokenAddress, account.data).call();
 
-    try {
-      await trackPromise(
-        tokenToRepay.methods
-          .approve(contract.options.address, toWei(amountToPayBack))
-          .send({ from: account.data })
-      );
+    console.log("tokenBought", tokenBought)
+    const interest = await contract.methods.interest(token.tokenAddress, tokenBought).call();
+    // const interest = Number(token.borrowAPYRate) * Number(toWei(value));
+    const amountToPayBack = (Number(toWei(value, token.decimals)) + Number(interest)).toString();
 
-      const repayResult = await trackPromise(
-        contract.methods
-          .payDebt(token.tokenAddress, toWei(value))
-          .send({ from: account.data })
-      );
-      setRepayResult(repayResult);
-    } catch (err) {
-      setRepayError(err);
+    if (token.tokenAddress == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+      try {
+        const repayResult = await trackPromise(
+          contract.methods
+            .payDebt(token.tokenAddress, 0)
+            .send({ from: account.data, value: amountToPayBack})
+        );
+        setRepayResult(repayResult);
+      } catch (err) {
+        setRepayError(err);
+      }
+    } else {
+      const tokenToRepay = new web3.eth.Contract(ERC20.abi, token.tokenAddress);
+      try {
+        console.log("amountToPayBack", amountToPayBack)
+        await trackPromise(
+          tokenToRepay.methods
+            .approve(contract.options.address, amountToPayBack)
+            .send({ from: account.data })
+        );
+
+        const repayResult = await trackPromise(
+          contract.methods
+            .payDebt(token.tokenAddress, amountToPayBack)
+            .send({ from: account.data })
+        );
+        setRepayResult(repayResult);
+      } catch (err) {
+        setRepayError(err);
+      }
     }
   };
 
   const addBorrowedToken = async (token) => {
-
     const tokenAddress = token.tokenAddress;
     const tokenSymbol = token.name;
     const tokenDecimals = token.decimals;
@@ -239,7 +297,7 @@ export default function Home() {
       });
 
       if (wasAdded) {
-     // Added
+        // Added
       } else {
         // Not Added
       }
@@ -250,15 +308,16 @@ export default function Home() {
 
   const addATK = async (token) => {
     let NETWORK_ID = await web3.eth.net.getId();
-    const aToken = new web3.eth.Contract(
+    
+    const larToken = new web3.eth.Contract(
       ERC20.abi,
-      ATKToken.networks[NETWORK_ID].address
+      LARToken.networks[NETWORK_ID].address
     );
 
-    const tokenAddress = aToken.options.address;
+    const tokenAddress = larToken.options.address;
     const tokenSymbol = "ATK";
     const tokenDecimals = 18;
-    const tokenImage = IMAGES["ATK"];
+    const tokenImage = IMAGES["LAR"];
 
     try {
       // wasAdded is a boolean. Like any RPC method, an error may be thrown.
@@ -285,7 +344,6 @@ export default function Home() {
     }
   };
 
-
   return (
     <div>
       <Head>
@@ -298,10 +356,10 @@ export default function Home() {
               <div>Page is Loading</div>
             ) : (
               <div>
-                <div className="relative bg-gray-100 ">
+                <div className="relative bg-white-100 ">
                   <Navbar accountAddress={account.data} />
                   {/* Header */}
-                  <div className="relative bg-gray-700 md:pt-32 pb-32 pt-12">
+                  <div className="relative bg-blue-100 md:pt-32 pb-32 pt-12">
                     <div className="px-1 md:px-10 mx-auto w-full">
                       <div>
                         {/* Card stats */}
@@ -319,15 +377,24 @@ export default function Home() {
                                 />
 
                                 <div className="">
-                                    {network.data === "Goerli Test Network"
-                                    ?<div className="text-2xl sm:text-2xl text- ml-2 text-white font-bold">Ethereum Goerli Market</div>
-                                    :  (<><div className="bg-red-500 p-2 text-sm rounded-md text-white">Connected to the Wrong network</div>
-                                    <div className="text-2xl sm:text-2xl text- ml-2 text-white font-bold">Switch to Goerli</div></>)
-                                    }
+                                  {network.data === "Goerli Test Network" ? (
+                                    <div className="text-2xl text-black sm:text-2xl text- ml-2 font-bold">
+                                      Lending Borrowing Platform
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="bg-red-500 p-2 text-sm rounded-md text-white">
+                                        Connected to the Wrong network
+                                      </div>
+                                      <div className="text-2xl sm:text-2xl text- ml-2 text-white font-bold">
+                                        Please switch to Goerli
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
                               </div>
-                              <div className="flex mt-2">
-                                <div className="flex pt-2 sm:ml-6 items-center">
+                              <div className="flex mt-2 text-black">
+                                <div className="flex pt-2 sm:ml-6 items-center ">
                                   <div className=" h-9">
                                     <svg
                                       xmlns="http://www.w3.org/2000/svg"
@@ -345,8 +412,8 @@ export default function Home() {
                                     </svg>
                                   </div>
                                   <div className=" ml-2">
-                                    <div className="text-sm text-white">
-                                      Networth{" "}
+                                    <div className="text-sm text-black">
+                                      Wallet Balance{" "}
                                       <p className="font-bold text-xl">
                                         $
                                         {isNaN(
@@ -372,6 +439,77 @@ export default function Home() {
                   </div>
                   <div className="px-2 md:px-10 mx-auto w-full -m-24">
                     <div className="flex flex-wrap mt-4">
+                    <div className="w-full xl:w-12/12  xl:mb-0 px-2">
+                        <SupportedAssets tokens={tokens.data}>
+                          {(token) => {
+                            return (
+                              <RowSupportedAsset
+                                token={token}
+                                key={token.tokenAddress}
+                                Supply={() => {
+                                  return (
+                                    <button
+                                      onClick={() =>
+                                        setSelectedTokenToSupply(token)
+                                      }
+                                      className="bg-gray-700 text-base text-white p-2 rounded-md"
+                                    >
+                                      Supply
+                                    </button>
+                                  );
+                                }}
+                                Details={() => {
+                                  if (web3 && contract) {
+                                    return (
+                                      <Link
+                                        href={{
+                                          pathname: `/reserve-overview/${token.name}`,
+                                          query: {
+                                            ...token,
+                                            availableAmountInContract:
+                                              JSON.stringify(
+                                                token.availableAmountInContract
+                                              ),
+                                            image: JSON.stringify(token.image),
+                                            totalBorrowedInContract:
+                                              JSON.stringify(
+                                                token.totalBorrowedInContract
+                                              ),
+                                            totalSuppliedInContract:
+                                              JSON.stringify(
+                                                token.totalSuppliedInContract
+                                              ),
+
+                                            userTokenBorrowedAmount:
+                                              JSON.stringify(
+                                                token.userTokenBorrowedAmount
+                                              ),
+                                            userTokenLentAmount: JSON.stringify(
+                                              token.userTokenLentAmount
+                                            ),
+                                            walletBalance: JSON.stringify(
+                                              token.walletBalance
+                                            ),
+                                            userTotalSupplyBalance:
+                                              yourSupplies.data?.yourBalance,
+                                          },
+                                          // the data
+                                        }}
+                                        as={`/reserve-overview/${token.name}`}
+                                      >
+                                        <a className="ml-2 border border-gray-400 text-base bg-blue-200 font-medium text-gray-800 p-2 rounded-md">
+                                          {" "}
+                                          Details
+                                        </a>
+                                      </Link>
+                                    );
+                                  }
+                                }}
+                              />
+                            );
+                          }}
+                        </SupportedAssets>
+                      </div>
                       <div className="w-full xl:w-6/12 xl:mb-0 px-2">
                         {yourSupplies && (
                           <YourSupply
@@ -389,7 +527,7 @@ export default function Home() {
                                         onClick={() =>
                                           setSelectedTokenToWithdraw(token)
                                         }
-                                        className="bg-gray-700 text-base text-white p-2 rounded-md"
+                                        className="ml-2 border border-gray-400 bg-white-500 text-base text-black p-2 rounded-md"
                                       >
                                         Withdraw
                                       </button>
@@ -429,7 +567,7 @@ export default function Home() {
                                       onClick={() =>
                                         setSelectedTokenToRepay(token)
                                       }
-                                      className="bg-gray-700 text-base text-white p-2 rounded-md"
+                                      className="ml-2 border border-gray-400 bg-white-500 text-base text-black p-2 rounded-md"
                                     >
                                       Repay
                                     </button>
@@ -455,74 +593,7 @@ export default function Home() {
                     </div>
 
                     <div className="flex flex-wrap mt-4">
-                      <div className="w-full xl:w-6/12  xl:mb-0 px-2">
-                        <SupplyAsset tokens={tokens.data}>
-                          {(token) => {
-                            return (
-                              <RowSupplyAsset
-                                token={token}
-                                key={token.tokenAddress}
-                                Supply={() => {
-                                  return (
-                                    <button
-                                      onClick={() =>
-                                        setSelectedTokenToSupply(token)
-                                      }
-                                      className="bg-gray-700 text-base text-white p-2 rounded-md"
-                                    >
-                                      Supply
-                                    </button>
-                                  );
-                                }}
-                                Details={() => {
-                                  if (web3 && contract) {
-                                    return (
-                                      <Link
-                                        href={{
-                                          pathname: `/reserve-overview/${token.name}`,
-                                          query: {
-                                            ...token,
-                                            availableAmountInContract: JSON.stringify(
-                                              token.availableAmountInContract
-                                            ),
-                                            image: JSON.stringify(token.image),
-                                            totalBorrowedInContract: JSON.stringify(
-                                              token.totalBorrowedInContract
-                                            ),
-                                            totalSuppliedInContract: JSON.stringify(
-                                              token.totalSuppliedInContract
-                                            ),
-
-                                            userTokenBorrowedAmount: JSON.stringify(
-                                              token.userTokenBorrowedAmount
-                                            ),
-                                            userTokenLentAmount: JSON.stringify(
-                                              token.userTokenLentAmount
-                                            ),
-                                            walletBalance: JSON.stringify(
-                                              token.walletBalance
-                                            ),
-                                            userTotalSupplyBalance:
-                                              yourSupplies.data?.yourBalance,
-                                          },
-                                          // the data
-                                        }}
-                                        as={`/reserve-overview/${token.name}`}
-                                      >
-                                        <a className="ml-2 border border-gray-400 text-base font-medium text-gray-800 p-2 rounded-md">
-                                          {" "}
-                                          Details
-                                        </a>
-                                      </Link>
-                                    );
-                                  }
-                                }}
-                              />
-                            );
-                          }}
-                        </SupplyAsset>
-                      </div>
-                      <div className="w-full xl:w-6/12 px-2">
+                      {/* <div className="w-full xl:w-6/12 px-2">
                         <BorrowAssets tokens={tokensForBorrow.data}>
                           {(token) => {
                             return (
@@ -549,19 +620,23 @@ export default function Home() {
                                         pathname: `/reserve-overview/${token.name}`,
                                         query: {
                                           ...token,
-                                          availableAmountInContract: JSON.stringify(
-                                            token.availableAmountInContract
-                                          ),
+                                          availableAmountInContract:
+                                            JSON.stringify(
+                                              token.availableAmountInContract
+                                            ),
                                           image: JSON.stringify(token.image),
-                                          totalBorrowedInContract: JSON.stringify(
-                                            token.totalBorrowedInContract
-                                          ),
-                                          totalSuppliedInContract: JSON.stringify(
-                                            token.totalSuppliedInContract
-                                          ),
-                                          userTokenBorrowedAmount: JSON.stringify(
-                                            token.userTokenBorrowedAmount
-                                          ),
+                                          totalBorrowedInContract:
+                                            JSON.stringify(
+                                              token.totalBorrowedInContract
+                                            ),
+                                          totalSuppliedInContract:
+                                            JSON.stringify(
+                                              token.totalSuppliedInContract
+                                            ),
+                                          userTokenBorrowedAmount:
+                                            JSON.stringify(
+                                              token.userTokenBorrowedAmount
+                                            ),
                                           userTokenLentAmount: JSON.stringify(
                                             token.userTokenLentAmount
                                           ),
@@ -586,10 +661,10 @@ export default function Home() {
                             );
                           }}
                         </BorrowAssets>
-                      </div>
+                      </div> */}
                     </div>
 
-                     <Footer />
+                    <Footer />
                   </div>
                 </div>
               </div>
@@ -601,7 +676,12 @@ export default function Home() {
           </>
         ) : requireInstall ? (
           <div className="w-full grid h-screen place-items-center bg-black text-white">
-            <button onClick={() => {window.open('https://metamask.io/download/', '_blank')}} className="border border-white p-2 rounded-md">
+            <button
+              onClick={() => {
+                window.open("https://metamask.io/download/", "_blank");
+              }}
+              className="border border-white p-2 rounded-md"
+            >
               Install metamask
             </button>
           </div>

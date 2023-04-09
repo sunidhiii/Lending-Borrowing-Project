@@ -10,14 +10,10 @@ export const loadContract = async (contractName, web3) => {
 
   try {
 
-    // console.log("lendingBorrowing", lendingBorrowing.address);
-
     contract = new web3.eth.Contract(
      Artifact.abi,
      lendingBorrowing.address
     );
-
-    // console.log("contract", contract);
 
   }
   catch (err) {

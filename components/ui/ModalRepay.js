@@ -6,7 +6,6 @@ import { LoadingSpinerComponent } from "../../utils/Spinner";
 import BorderLayout from "./BorderLayout";
 import { usePromiseTracker } from "react-promise-tracker";
 
-
 export default function ModalRepay({
   token,
   closeModal,
@@ -15,7 +14,6 @@ export default function ModalRepay({
   repayResult,
   web3,
 }) {
-
   const { promiseInProgress } = usePromiseTracker();
 
   const toWei = (value) => {
@@ -31,10 +29,10 @@ export default function ModalRepay({
 
   const actualMax =
     (Number(token.walletBalance.amount) -
-      Number(token.walletBalance.amount) * Number(token.borrowAPYRate));
+    (Number(token.walletBalance.amount) * Number(token.borrowAPYRate))/100).toString();
   const tokenOwedWithInterest =
-    Number(token.userTokenBorrowedAmount.amount) +
-    Number(token.userTokenBorrowedAmount.amount) * Number(token.borrowAPYRate);
+    (Number(token.userTokenBorrowedAmount.amount) +
+    (Number(token.userTokenBorrowedAmount.amount) * Number(token.borrowAPYRate))/100).toString();
 
   let max;
 
@@ -67,7 +65,11 @@ export default function ModalRepay({
             }}
             disabled={promiseInProgress}
             type="button"
-            className={`text-gray-400 bg-transparent ${promiseInProgress ? "text-gray-200": "dark:hover:bg-gray-600 dark:hover:text-white hover:bg-gray-200 hover:text-gray-900" }  rounded-lg text-sm p-1.5 ml-auto inline-flex items-center `}
+            className={`text-gray-400 bg-transparent ${
+              promiseInProgress
+                ? "text-gray-200"
+                : "dark:hover:bg-gray-600 dark:hover:text-white hover:bg-gray-200 hover:text-gray-900"
+            }  rounded-lg text-sm p-1.5 ml-auto inline-flex items-center `}
             data-modal-toggle="small-modal"
           >
             <svg
@@ -113,9 +115,9 @@ export default function ModalRepay({
                   "_blank"
                 );
               }}
-              className="text-sm self-end pr-3 mt-3 text-gray-500 "
+              className="text-sm justify-center pr-3 mt-3 text-blue-500 "
             >
-              Review tx details
+              view tx details on etherscan{" "}
             </button>
 
             <div className="flex w-full items-center p-6 space-x-2 rounded-b border-gray-200 dark:border-gray-600">
@@ -182,7 +184,7 @@ export default function ModalRepay({
 
               <div className="w-full justify-between flex items-center">
                 <p className="pl-2 pt-0 mt-0 font-medium text-sm text-gray-400">
-                  ${isNaN(valueInDollars) ? "0": valueInDollars}
+                  ${isNaN(valueInDollars) ? "0" : valueInDollars}
                 </p>
                 <div className="flex items-center">
                   <p className="font-medium text-sm text-gray-600">
@@ -244,11 +246,15 @@ export default function ModalRepay({
           {/* <!-- Modal footer --> */}
           <div className="flex w-full items-center p-6 space-x-2 rounded-b border-gray-200 dark:border-gray-600">
             <button
-                disabled={!!!value}
-                onClick={() => onRepay(token, value)}
-                data-modal-toggle="small-modal"
-                type="button"
-                className={`${promiseInProgress ? "bg-gray-500 cursor-wait": "bg-gray-800 hover:bg-gray-900 "}text-white w-full hover:text-white rounded-md p-2`}
+              disabled={!!!value}
+              onClick={() => onRepay(token, value)}
+              data-modal-toggle="small-modal"
+              type="button"
+              className={`${
+                promiseInProgress
+                  ? "bg-gray-500 cursor-wait"
+                  : "bg-gray-800 hover:bg-gray-900 "
+              }text-white w-full hover:text-white rounded-md p-2`}
             >
               <div className="flex justify-center ">
                 <LoadingSpinerComponent

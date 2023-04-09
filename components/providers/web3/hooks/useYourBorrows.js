@@ -37,7 +37,7 @@ export const handler = (web3, contract) => () => {
             const currentToken = await contract.methods.supportedTokens(currentTokenAddress).call();
 
             const normalized = await normalizeToken(web3, contract, currentToken);
-            // console.log("normalized==>", normalized);
+
             yourBalance += parseFloat(normalized.userTokenBorrowedAmount.inDollars);
 
 

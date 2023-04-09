@@ -12,6 +12,7 @@ const NETWORKS = {
   11155111: "Sepolia Test Network"
 };
 
+
 export const handler = (web3, contract) => () => {
 
   const { data, error, mutate, ...rest } = useSWR(
@@ -19,18 +20,18 @@ export const handler = (web3, contract) => () => {
     async () => {
       const borrowAssets = []
       const tokens = await contract.methods.getAllSupportedTokens().call()
-      console.log("currentToken", tokens);
+      console.log("getAllSupportedTokens", tokens);
       
       for (let i = 0; i < tokens.length; i++){
         const currentToken = tokens[i]
 
         const currentTokenObj = await contract.methods.supportedTokens(currentToken).call();
 
-        console.log("currentTokenObj==>", currentTokenObj);
 
         const newToken = await normalizeToken(web3, contract, currentTokenObj)
 
         borrowAssets.push(newToken)
+
 
       }
 
