@@ -452,7 +452,7 @@ export default function Home() {
                                       onClick={() =>
                                         setSelectedTokenToSupply(token)
                                       }
-                                      className="bg-gray-700 text-base text-white p-2 rounded-md"
+                                      className="bg-blue-400 text-base text-white p-2 rounded-md"
                                     >
                                       Supply
                                     </button>
@@ -497,8 +497,8 @@ export default function Home() {
                                         }}
                                         as={`/reserve-overview/${token.name}`}
                                       >
-                                        <a className="ml-2 border border-gray-400 text-base bg-blue-200 font-medium text-gray-800 p-2 rounded-md">
-                                          {" "}
+                                        <a className="ml-2 bg-blue-400 text-base text-white p-2 rounded-md">
+                                          {" "} 
                                           Details
                                         </a>
                                       </Link>
@@ -527,7 +527,7 @@ export default function Home() {
                                         onClick={() =>
                                           setSelectedTokenToWithdraw(token)
                                         }
-                                        className="ml-2 border border-gray-400 bg-white-500 text-base text-black p-2 rounded-md"
+                                        className="ml-2 bg-blue-400 text-base text-white p-2 rounded-md"
                                       >
                                         Withdraw
                                       </button>
@@ -539,7 +539,7 @@ export default function Home() {
                                         onClick={() =>
                                           setSelectedTokenToSupply(token)
                                         }
-                                        className="ml-2 border border-gray-400 text-base font-medium text-gray-800 p-2 rounded-md"
+                                        className="ml-2 bg-blue-400 text-base text-white p-2 rounded-md"
                                       >
                                         Supply
                                       </button>
@@ -567,10 +567,10 @@ export default function Home() {
                                       onClick={() =>
                                         setSelectedTokenToRepay(token)
                                       }
-                                      className="ml-2 border border-gray-400 bg-white-500 text-base text-black p-2 rounded-md"
+                                      className="ml-2 bg-white-500 bg-blue-400 text-base text-white p-2 rounded-md"
                                     >
                                       Repay
-                                    </button>
+                                    </button> 
                                   );
                                 }}
                                 Borrow={() => {
@@ -579,7 +579,7 @@ export default function Home() {
                                       onClick={() =>
                                         setSelectedTokenToBorrow(token)
                                       }
-                                      className="ml-2 border border-gray-400 text-base font-medium text-gray-800 p-2 rounded-md"
+                                      className="ml-2 bg-white-500 bg-blue-400 text-base text-white p-2 rounded-md"
                                     >
                                       Borrow
                                     </button>
@@ -686,19 +686,19 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="w-full grid h-screen place-items-center bg-black text-white">
+          <div className="w-full grid h-screen place-items-center bg-blue-200 text-black">
             <button
               onClick={() => connect()}
               className="border border-white p-2 rounded-md"
             >
-              Connect to metamask with your browser
+              Connect metamask to proceed . . . .
             </button>
           </div>
         )
       ) : (
-        <div className="w-full grid h-screen place-items-center bg-black text-white">
+        <div className="w-full grid h-screen place-items-center bg-blue-200 text-black">
           <div className="border border-white p-2 rounded-md">
-            Connecting.... Please! Wait for a moment.
+            Connecting metamask . . . .
           </div>
         </div>
       )}

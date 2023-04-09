@@ -10,7 +10,7 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   }
 })
 
-const privateKey = "80a23ec96849eb42998ea20bc35e064f511767ecbfb434de95b94759402a1e1a";
+const privateKey = "";
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
